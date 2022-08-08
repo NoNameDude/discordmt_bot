@@ -24,3 +24,6 @@ It's writing and reading everything to / from a txt file, simply but secure.
 
 #### Minetest:
 <img src="https://github.com/NoNameDude/discordmt_bot/blob/main/spoiler_minetest.PNG" width="385px" align="center">
+
+
+**If you want to run the source, however, Python 3.6.3+ and discord.py 1.2.5+ are required.**
