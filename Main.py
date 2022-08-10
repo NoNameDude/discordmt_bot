@@ -7,6 +7,7 @@ from discord.ext.commands import bot
 minetest_messages = []
   
 config = configparser.ConfigParser()
+#you may need to path to bot.conf
 config.read('bot.conf')    
 #settings 
 bot = commands.Bot(command_prefix=config["BOT"]["command_prefix"], help_command=None)   
@@ -72,7 +73,7 @@ async def on_ready():
 @bot.event
 async def on_message(message):
     #make sure the channel is the right one and the bot messages getting ignored
-    if (message.channel.id == relay_channel) and (message.author.id != bot.user.id):
+    if (message.channel.id == int(relay_channel)) and (message.author.id != bot.user.id):
         author = message.author.name
         if config["RELAY"]["use_nicknames"] == True:
             author = message.author.display_name
