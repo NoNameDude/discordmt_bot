@@ -23,6 +23,7 @@ It's writing and reading everything to / from a txt file, simply but secure.
 ### Example pictures:
 #### Discord:
 <img src="https://github.com/NoNameDude/discordmt_bot/blob/main/spoiler_discord.PNG" width="385px" align="center">
+**Note** Debug is also added best in a staff-only chat
 
 #### Minetest:
 <img src="https://github.com/NoNameDude/discordmt_bot/blob/main/spoiler_minetest.PNG" width="385px" align="center">
