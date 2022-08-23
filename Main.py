@@ -17,6 +17,8 @@ python_report_file = config["RELAY"]["report_file_path"]
 relay_channel = config["RELAY"]["relay_channel"] 
 report_channel = config["RELAY"]["report_channel"]
 cooldown = config["RELAY"]["cooldown"]
+debug_channel = config["RELAY"]["debug_channel"]
+debug_file = config["RELAY"]["debug_action_file_path"]
 
 def get_reports_msg():
     if os.path.getsize(python_report_file) != 0: 
@@ -45,6 +47,22 @@ def get_messages():
                 
             #once readed empty file's input
             file = open(lua_file, 'w')
+            file.write("")
+            file.close()     
+                
+        return messages 
+  
+def get_debug_message(): 
+    #check if file has input or is empty
+    if os.path.getsize(debug_file) != 0:   
+        messages = []
+        with open(debug_file, 'r') as filehandle:
+            for message in filehandle: 
+                messages.append(message) 
+                #configs.append(currentPlace)
+                
+            #once readed empty file's input
+            file = open(debug_file, 'w')
             file.write("")
             file.close()     
                 
@@ -87,26 +105,34 @@ async def on_message(message):
 async def task_loop():
     channel = await bot.fetch_channel(relay_channel)
     rep_channel = await bot.fetch_channel(report_channel)
+    deb_channel = await bot.fetch_channel(debug_channel)
     #check if channel exists
     if channel is None:
         print("Error: Channel id {}, dosn't exists".format(channel)) 
     elif rep_channel is None:
         print("Error: Channel id {}, dosn't exists".format(rep_channel))
+    elif debug_channel is None:
+        print("Error: Channel id {}, dosn't exists".format(debug_channel))
         
      
     #get messages from lua.txt
     messages = get_messages() 
     report_msg = get_reports_msg()
+    debug_msg = get_debug_message()
     
     #Read / send messages
     if messages != None:    
         for msg in (messages):  
-            await channel.send(msg) 
+            print(msg)
+            #await channel.send(msg) 
     
     if report_msg != None:
         for rmsg in (report_msg):
             await rep_channel.send(rmsg)    
 
+    if debug_msg != None:
+        for dmsg in (debug_msg):
+            await deb_channel.send(dmsg)  
             
     #only write if array isn't emtpy
     if len(minetest_messages) != 0:
@@ -115,3 +141,4 @@ async def task_loop():
 
 #bot token to run
 bot.run(config["BOT"]["bot_token"]) 
+
