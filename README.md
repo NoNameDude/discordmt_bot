@@ -6,11 +6,13 @@
 bot_token = <Toke in here>
 command_prefix = !bot
 [RELAY]
-lua_file_path = <Path to lua.txt in here>
-python_file_path = <Path to python.txt in here>
-report_file_path = <Path to report.txt in here>
+lua_file_path = <Path to Lua.txt in here>
+python_file_path = <Path to Python.txt in here>
+report_file_path = <Path to Report.txt in here>
+debug_action_file_path = <Path to Debug_action.txt in here>
 report_channel = <id in here>
 relay_channel = <id in here>
+debug_channel = <id in here>
 use_nicknames = True
 cooldown = 2
 ```
