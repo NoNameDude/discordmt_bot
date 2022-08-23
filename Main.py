@@ -123,8 +123,7 @@ async def task_loop():
     #Read / send messages
     if messages != None:    
         for msg in (messages):  
-            print(msg)
-            #await channel.send(msg) 
+            await channel.send(msg) 
     
     if report_msg != None:
         for rmsg in (report_msg):
