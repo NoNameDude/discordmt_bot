@@ -10,7 +10,12 @@ config = configparser.ConfigParser()
 #you may need to path to bot.conf
 config.read('bot.conf')    
 #settings 
-bot = commands.Bot(command_prefix=config["BOT"]["command_prefix"], help_command=None)   
+bot = commands.Bot(
+  command_prefix=config["BOT"]["command_prefix"], 
+  help_command=None, 
+  intents=discord.Intents(messages=True, message_content=True)
+)   
+
 lua_file = config["RELAY"]["lua_file_path"]
 python_file = config["RELAY"]["python_file_path"]
 python_report_file = config["RELAY"]["report_file_path"]
