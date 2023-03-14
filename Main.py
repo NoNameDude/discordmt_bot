@@ -3,6 +3,7 @@ import os
 import discord
 from discord.ext import commands, tasks 
 from discord.ext.commands import bot
+import asyncio
 #array to send messages to minetest from discord  
 minetest_messages = []
   
@@ -108,9 +109,15 @@ async def on_message(message):
 #loop to check if file has input or not
 @tasks.loop(seconds=int(cooldown))
 async def task_loop():
-    channel = await bot.fetch_channel(relay_channel)
-    rep_channel = await bot.fetch_channel(report_channel)
-    deb_channel = await bot.fetch_channel(debug_channel)
+    #incase of an timeout
+    try:
+        channel = await bot.fetch_channel(relay_channel)
+        rep_channel = await bot.fetch_channel(report_channel)
+        deb_channel = await bot.fetch_channel(debug_channel)
+    except discord.HTTPException as e:
+        print(f'Error: {e}')
+        await asyncio.sleep(60)
+        
     #check if channel exists
     if channel is None:
         print("Error: Channel id {}, dosn't exists".format(channel)) 
