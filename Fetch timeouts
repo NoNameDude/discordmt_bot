@@ -1,0 +1,17 @@
+/home/arnav/Documents/tej.js/node_modules/undici/lib/fetch/index.js:197
+        Object.assign(new TypeError('fetch failed'), { cause: response.error })
+                      ^
+TypeError: fetch failed
+    at Object.processResponse (/home/arnav/Documents/tej.js/node_modules/undici/lib/fetch/index.js:197:23)
+    at /home/arnav/Documents/tej.js/node_modules/undici/lib/fetch/index.js:930:38
+    at node:internal/process/task_queues:141:7
+    at AsyncResource.runInAsyncScope (node:async_hooks:201:9)
+    at AsyncResource.runMicrotask (node:internal/process/task_queues:138:8)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5) {
+  cause: ConnectTimeoutError: Connect Timeout Error
+      at Timeout.onConnectTimeout [as _onTimeout] (/home/arnav/Documents/tej.js/node_modules/undici/lib/core/connect.js:108:24)
+      at listOnTimeout (node:internal/timers:561:11)
+      at processTimers (node:internal/timers:502:7) {
+    code: 'UND_ERR_CONNECT_TIMEOUT'
+  }
+}
