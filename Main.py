@@ -6,7 +6,7 @@ from discord.ext.commands import bot
 import asyncio
 #array to send messages to minetest from discord  
 minetest_messages = []
-  
+
 config = configparser.ConfigParser()
 #you may need to path to bot.conf
 config.read('bot.conf')    
@@ -26,74 +26,42 @@ cooldown = config["RELAY"]["cooldown"]
 debug_channel = config["RELAY"]["debug_channel"]
 debug_file = config["RELAY"]["debug_action_file_path"]
 
-def get_reports_msg():
-    if os.path.getsize(python_report_file) != 0: 
-        messages = []
-        with open(python_report_file, 'r') as filehandle:
-            for message in filehandle: 
-                messages.append(message)  
-                #configs.append(currentPlace)
-                
-            #once readed empty file's input
-            file = open(python_report_file, 'w')
-            file.write("")
-            file.close()     
-                
-        return messages
-      
-      
-def get_messages(): 
-    #check if file has input or is empty
-    if os.path.getsize(lua_file) != 0:   
-        messages = []
-        with open(lua_file, 'r') as filehandle:
-            for message in filehandle: 
-                messages.append(message) 
-                #configs.append(currentPlace)
-                
-            #once readed empty file's input
-            file = open(lua_file, 'w')
-            file.write("")
-            file.close()     
-                
-        return messages 
-  
-def get_debug_message(): 
-    #check if file has input or is empty
-    if os.path.getsize(debug_file) != 0:   
-        messages = []
-        with open(debug_file, 'r') as filehandle:
-            for message in filehandle: 
-                messages.append(message) 
-                #configs.append(currentPlace)
-                
-            #once readed empty file's input
-            file = open(debug_file, 'w')
-            file.write("")
-            file.close()     
-                
-        return messages 
-  
-def write_messages():
-    #check if discord has messages to send and if so empty the array and send 
-    if os.path.getsize(python_file) == 0:
-        #once readed empty file's input
-        file = open(python_file, 'a')
-        for dmsg in (minetest_messages):
-            file.write("{} \n".format(dmsg))
-                        
-        file.close()
-        minetest_messages.clear()
 
+class Queue:
+    def __init__(self):
+        self.msg = []
+    
+    def get(self, path): 
+        if os.path.getsize(path) != 0: 
+            with open(path, 'r') as filehandle:
+                for message in filehandle: 
+                    self.msg.append(message.strip())  # Use strip to remove newline characters
+                
+            # Once read, empty the file's input
+            with open(path, 'w') as file:
+                file.write("")     
+                 
+            return self.msg  # Return the messages, not a method reference
+    
+    def write(self, path):
+        if os.path.getsize(path) == 0:
+            with open(path, 'a') as file: 
+                for dmsg in minetest_messages:
+                    file.write("{}\n".format(dmsg))
+            minetest_messages.clear()
 
-@bot.event     
+queue = Queue()
+
+            
+ 
+@bot.event      
 async def on_ready():  
     print('Connected!')
     #start the loop   
     task_loop.start()
      
 
-#fetch messages in the channel
+#fetch messages in the channel 
 @bot.event
 async def on_message(message):
     #make sure the channel is the right one and the bot messages getting ignored
@@ -106,50 +74,56 @@ async def on_message(message):
         minetest_messages.append(msg)  
         
     
-#loop to check if file has input or not
+#loop to check if file has input or 
 @tasks.loop(seconds=int(cooldown))
 async def task_loop():
-    #incase of an timeout
-    try:
+    # In case of a timeout
+    try: 
         channel = await bot.fetch_channel(relay_channel)
         rep_channel = await bot.fetch_channel(report_channel)
         deb_channel = await bot.fetch_channel(debug_channel)
-    except discord.HTTPException as e:
-        print(f'Error: {e}')
-        await asyncio.sleep(60)
         
-    #check if channel exists
-    if channel is None:
-        print("Error: Channel id {}, dosn't exists".format(channel)) 
-    elif rep_channel is None:
-        print("Error: Channel id {}, dosn't exists".format(rep_channel))
-    elif debug_channel is None:
-        print("Error: Channel id {}, dosn't exists".format(debug_channel))
-        
-     
-    #get messages from lua.txt
-    messages = get_messages() 
-    report_msg = get_reports_msg()
-    debug_msg = get_debug_message()
-    
-    #Read / send messages
-    if messages != None:    
-        for msg in (messages):  
-            await channel.send(msg) 
-    
-    if report_msg != None:
-        for rmsg in (report_msg):
-            await rep_channel.send(rmsg)    
+        # Check if channel exists
+        if channel is None:
+            print(f"Error: Channel id {relay_channel} doesn't exist")
+        elif rep_channel is None:
+            print(f"Error: Channel id {report_channel} doesn't exist") 
+        elif deb_channel is None:
+            print(f"Error: Channel id {debug_channel} doesn't exist")
 
-    if debug_msg != None:
-        for dmsg in (debug_msg):
-            await deb_channel.send(dmsg)  
-            
-    #only write if array isn't emtpy
-    if len(minetest_messages) != 0:
-        write_messages() 
-    
+        # Get messages from files
+        messages = queue.get(lua_file)
+        report_msg = queue.get(python_report_file)
+        debug_msg = queue.get(debug_file) 
+
+        # Read / send messages
+        if messages:
+            for msg in messages:  
+                await channel.send(msg)
+
+        if report_msg:
+            for rmsg in report_msg:
+                await rep_channel.send(rmsg)    
+
+        if debug_msg:
+            for dmsg in debug_msg: 
+                await deb_channel.send(dmsg)  
+
+        # Only write if array isn't empty
+        if minetest_messages:
+            queue.write(python_file)  
+    except discord.HTTPException as e:
+        print(f'HTTPException: {e}')
+        await asyncio.sleep(60)  # wait before retrying
+
+    except discord.DiscordServerError as e:
+        print(f'DiscordServerError: {e}')
+        await asyncio.sleep(60)  # wait before retrying
+
+    except Exception as e:
+        print(f'Unexpected error: {e}')
+        await asyncio.sleep(60)  # wait before retrying
+     
 
 #bot token to run
 bot.run(config["BOT"]["bot_token"]) 
-
