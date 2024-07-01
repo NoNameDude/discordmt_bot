@@ -1,4 +1,6 @@
 --More debug comming soon [WIP]
+--localize for performance
+local send_message_on_discord_debugs = discord_mt.send_message_on_discord_debugs
 minetest.register_on_dignode(function(pos, oldnode, digger)
     if not digger then return end
     if not oldnode then return end
@@ -15,3 +17,4 @@ minetest.register_on_placenode(function(pos, newnode, placer, oldnode, itemstack
     send_message_on_discord_debugs(msg)
 end)
 
+ 
