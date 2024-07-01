@@ -1,3 +1,4 @@
+discord_mt = {}
 dofile(minetest.get_modpath("discordmt_bot").."/debug.lua")
 local ie = minetest.request_insecure_environment()
 local conf = Settings(minetest.get_modpath(minetest.get_current_modname()) .. '/bot.conf')
@@ -5,18 +6,22 @@ local relay = {messages = {}, reports = {}, debugs = {}}
 local settings = conf:to_table()
 local cooldown = settings["cooldown"] --can be changed if wanted (higher number = less cpu ussage but longer delay. (Need to be > 0))
 
-function send_message_on_discord(msg)
+function discord_mt.send_message_on_discord(msg)
     table.insert(relay["messages"], msg) 
 end
- 
-function send_message_on_discord_reports(msg)
+--localize for performance
+local send_message_on_discord = discord_mt.send_message_on_discord
+function discord_mt.send_message_on_discord_reports(msg)
     table.insert(relay["reports"], msg) 
 end
-
-function send_message_on_discord_debugs(msg)
+--localize for performance
+local send_message_on_discord_reports = discord_mt.send_message_on_discord_reports
+function discord_mt.send_message_on_discord_debugs(msg)
     table.insert(relay["debugs"], msg) 
 end
- 
+--localize for performance
+local send_message_on_discord_debugs = discord_mt.send_message_on_discord_debugs
+
 --Get input string from the discord server
 local function get_recent_post()
     local python_file = ie.io.open(settings["python_file_path"], "r")
@@ -140,7 +145,7 @@ minetest.register_chatcommand("report", {
        send_message_on_discord_reports("[Server] Report from **"..name.."**: "..param)
     end
 })
-
+ 
 --if you got a own chat mod remove minetest.register_on_chat_message and implement this code into yours
 minetest.register_on_chat_message(function(name, message)
     local msg = "<"..name.."> "..message
@@ -148,3 +153,4 @@ minetest.register_on_chat_message(function(name, message)
     send_message_on_discord(msg)
     return true
 end)
+
